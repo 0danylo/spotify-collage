@@ -8,32 +8,26 @@
             display: none;
         }
 
-        .text-overflow {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            width: 500px;
-        }
-
-        #container {
-            height: 100%;
-            width: 100%;
-            font-size: 0;
-        }
-
-        #pl-name, #pl-cover, #collage-options, #pl-button {
+        #pl-name, #pl-cover, #pl-button {
             display: inline-block;
             *display: inline;
             zoom: 1;
-            vertical-align: center;
-            horiz-align: center;
-            font-size: 24px;
             width: 25%
+        }
+
+        #pl-button {
+            color: #202020;
+            font-size: 16px;
+        }
+
+        #pl-name {
+            text-align: right;
+            font-size: 20px;
         }
     </style>
 </head>
 
-<body>
+<body style="background-color: #202020; color: #E0E0E0">
 <div class="container">
     <div id="login">
         <h1>Playlist Collage</h1>
@@ -42,7 +36,6 @@
     <div id="loggedin">
         <div id="user-profile">
         </div>
-        <button class="btn btn-default" id="get-playlists">Get Playlists</button>
     </div>
 </div>
 
@@ -76,110 +69,96 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script>
-    (() => {
-        function getHashParams() {
-            var hashParams = {};
-            var e, r = /([^&;=]+)=?([^&;]*)/g,
-                q = window.location.hash.substring(1);
-            while (e = r.exec(q)) {
-                hashParams[e[1]] = decodeURIComponent(e[2]);
-            }
-            return hashParams;
+    const getHashParams = () => {
+        let hashParams = {};
+        let e, r = /([^&;=]+)=?([^&;]*)/g,
+            q = window.location.hash.substring(1);
+        while (e = r.exec(q)) {
+            hashParams[e[1]] = decodeURIComponent(e[2]);
         }
+        return hashParams;
+    }
 
-        let userProfileSource = document.getElementById('user-profile-template').innerHTML,
-            userProfileTemplate = Handlebars.compile(userProfileSource),
-            userProfilePlaceholder = document.getElementById('user-profile');
+    const makeRequest = url => { //make a request (for a user, their playlists, or a playlist's tracks)
+        return $.ajax({
+            url: url,
+            headers: {
+                'Authorization': 'Bearer ' + access_token
+            },
+            data: {
+                'limit': limit
+            }
+        })
+    }
 
-        const params = getHashParams();
+    let userProfileSource = document.getElementById('user-profile-template').innerHTML,
+        userProfileTemplate = Handlebars.compile(userProfileSource),
+        userProfilePlaceholder = document.getElementById('user-profile');
 
-        const access_token = params.access_token,
-            error = params.error;
+    const params = getHashParams();
+    const access_token = params.access_token,
+        error = params.error;
 
-        let userID, offset = 0, limit = 50; //supports up to 50 playlists
-        let playlists = new Array(), tracks
+    let userID, limit = 50; //supports up to 50 playlists
+    let playlists = [], tracks
 
-        if (error) {
-            alert('There was an error during the authentication');
-        } else {
-            if (access_token) {
-                $.ajax({ //get the user's profile
-                    url: 'https://api.spotify.com/v1/me',
-                    headers: {
-                        'Authorization': 'Bearer ' + access_token
-                    },
-                    success: (response) => {
-                        userProfilePlaceholder.innerHTML = userProfileTemplate(response);
-                        userID = response.id
-                        $('#login').hide();
-                        $('#loggedin').show();
+    if (error) {
+        alert('There was an error during the authentication');
+    } else {
+        if (access_token) {
+            makeRequest('https://api.spotify.com/v1/me').done(user => {
+                userProfilePlaceholder.innerHTML = userProfileTemplate(user);
+                userID = user.id
+                $('#login').hide();
+                $('#loggedin').show();
 
-                        request(`https://api.spotify.com/v1/users/${userID}/playlists`).done((data) => {
-                            playlists = data.items
+                makeRequest(`https://api.spotify.com/v1/users/${userID}/playlists`).done(data => {
+                    playlists = data.items
 
-                            document.body.innerHTML += '<hr>'
-                            for (let i = 0; i < playlists.length; i++) {
-                                document.body.innerHTML +=
-                                    '<div id=container>' +
-                                    '<div id="pl-name" style="padding-left: 100px;"><font size="5">' + playlists[i].name + '</font></div>' +
-                                    '<div id="pl-cover"><img src=' + playlists[i].images[0].url + ' width=150 height=150></div>' +
-                                    '<div id="pl-button"><button id="collage-btn' + i + '">Create collage</button></div>' +
-                                    '<hr></div>'
-                            }
+                    document.body.innerHTML += '<hr color="black">'
+                    for (let i = 0; i < playlists.length; i++) {
+                        document.body.innerHTML +=
+                            '<div id=pl-container style="padding-bottom: 10px; padding-top: 10px">' +
+                            '<div id="pl-name" style="padding-right: 100px;">' + playlists[i].name + '</div>' +
+                            '<div id="pl-cover"><img src=' + playlists[i].images[0].url + ' width=150 height=150></div>' +
+                            '<div id="pl-button"><button id="collage-btn' + i + '">Create collage</button></div>' +
+                            '<br></div>'
+                    }
 
-                            for (let i = 0; i < playlists.length; i++) {
-                                document.getElementById('collage-btn' + i).addEventListener('click', () => {
-                                    tracks = new Array()
-                                    getTracks(`https://api.spotify.com/v1/playlists/${playlists[i].id}/tracks`)
-                                }, false);
-                            }
-                        })
+                    for (let i = 0; i < playlists.length; i++) {
+                        document.getElementById('collage-btn' + i).addEventListener('click', async () => {
+                            tracks = []
+                            await getItems(`https://api.spotify.com/v1/playlists/${playlists[i].id}/tracks`, tracks)
+                            console.log(tracks)
+                        }, false);
                     }
                 });
-
-            } else { //authentication unsuccessful
-                $('#login').show();
-                $('#loggedin').hide();
-            }
-
-            const request = (url) => { //make a request (for a playlist or its tracks)
-                return $.ajax({
-                    url: url,
-                    headers: {
-                        'Authorization': 'Bearer ' + access_token
-                    },
-                    data: {
-                        'limit': limit
-                    }
-                })
-            }
-
-            const getPlaylists = (url) => { //doesn't work because of asynchronicity
-                request(url).done((data) => {
-                    for (let i = 0; i < data.items.length; i++) {
-                        playlists.push(data.items[i])
-                    }
-                    console.log(data)
-                    if (data.next !== null) {
-                        getPlaylists(data.next)
-                    }
-                })
-            }
-
-            const getTracks = (url) => { //get the tracks in a playlist
-                request(url).done((data) => {
-                    for (let i = 0; i < data.items.length; i++) {
-                        tracks.push(data.items[i])
-                    }
-                    console.log(data)
-                    if (data.next !== null) {
-                        getTracks(data.next)
-                    }
-                })
-            }
-
+            });
+        } else { //authentication unsuccessful
+            $('#login').show();
+            $('#loggedin').hide();
         }
-    })();
+    }
+
+    const getItems = (url, array) => { //get a user's playlists or the tracks in a playlist from a request
+        makeRequest(url).done(data => {
+            for (let i = 0; i < data.items.length; i++) {
+                array.push(data.items[i])
+            }
+            if (data.next !== null) {
+                getItems(data.next, array)
+            }
+        })
+    }
+
+    const createCollage = tracks => {
+        let freq = new Map()
+        for (let i = 0; i < tracks.length; i++) {
+            console.log(tracks[i])
+            freq.set(tracks[i].track.album.images[0], freq.get(tracks[i].track.album.images[0]) + 1 || 1)
+        }
+        console.log(freq)
+    }
 </script>
 </body>
 </html>

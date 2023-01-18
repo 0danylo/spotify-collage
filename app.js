@@ -11,7 +11,6 @@ const redirectURI = 'http://localhost:8888/callback'
 const stateKey = 'spotify_auth_state';
 const app = express();
 
-
 const generateRandomString = (length) => { //generate random string
     let text = '';
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -21,7 +20,6 @@ const generateRandomString = (length) => { //generate random string
     }
     return text;
 };
-
 
 app.use(express.static(__dirname + '/public'))
     .use(cors())
@@ -96,5 +94,5 @@ app.get('/callback',
         }
     });
 
-console.log('Listening on 8888');
 app.listen(8888);
+console.log('Listening on 8888');
