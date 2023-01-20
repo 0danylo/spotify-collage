@@ -12,7 +12,7 @@
             display: inline-block;
             *display: inline;
             zoom: 1;
-            width: 25%
+            width: 25%;
         }
 
         #pl-button {
@@ -68,7 +68,9 @@
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-<script>
+<script type="module">
+    import {createCollage} from './collage.js'
+
     const getHashParams = () => {
         let hashParams = {};
         let e, r = /([^&;=]+)=?([^&;]*)/g,
@@ -79,7 +81,7 @@
         return hashParams;
     }
 
-    const makeRequest = url => { //make a request (for a user, their playlists, or a playlist's tracks)
+    const makeRequest = url => { //make a request for a user, their playlists, or a playlist's tracks
         return $.ajax({
             url: url,
             headers: {
@@ -87,6 +89,17 @@
             },
             data: {
                 'limit': limit
+            }
+        })
+    }
+
+    const getItems = (url, array) => { //get a user's playlists or the tracks in a playlist
+        return makeRequest(url).then(data => {
+            for (let i = 0; i < data.items.length; i++) {
+                array.push(data.items[i])
+            }
+            if (data.next !== null) {
+                return getItems(data.next, array)
             }
         })
     }
@@ -99,37 +112,37 @@
     const access_token = params.access_token,
         error = params.error;
 
-    let userID, limit = 50; //supports up to 50 playlists
+    const api = 'https://api.spotify.com/v1'
+    let userID, limit = 50
     let playlists = [], tracks
 
     if (error) {
         alert('There was an error during the authentication');
     } else {
         if (access_token) {
-            makeRequest('https://api.spotify.com/v1/me').done(user => {
+            makeRequest(`${api}/me`).done(user => {
                 userProfilePlaceholder.innerHTML = userProfileTemplate(user);
-                userID = user.id
                 $('#login').hide();
                 $('#loggedin').show();
 
-                makeRequest(`https://api.spotify.com/v1/users/${userID}/playlists`).done(data => {
-                    playlists = data.items
-
-                    document.body.innerHTML += '<hr color="black">'
+                getItems(`${api}/users/${user.id}/playlists`, playlists).done(() => {
+                    document.body.innerHTML += '<hr color="black">' //doesn't work
                     for (let i = 0; i < playlists.length; i++) {
                         document.body.innerHTML +=
                             '<div id=pl-container style="padding-bottom: 10px; padding-top: 10px">' +
                             '<div id="pl-name" style="padding-right: 100px;">' + playlists[i].name + '</div>' +
                             '<div id="pl-cover"><img src=' + playlists[i].images[0].url + ' width=150 height=150></div>' +
                             '<div id="pl-button"><button id="collage-btn' + i + '">Create collage</button></div>' +
-                            '<br></div>'
+                            '</div>'
                     }
 
                     for (let i = 0; i < playlists.length; i++) {
-                        document.getElementById('collage-btn' + i).addEventListener('click', async () => {
+                        document.getElementById('collage-btn' + i).addEventListener('click', () => {
                             tracks = []
-                            await getItems(`https://api.spotify.com/v1/playlists/${playlists[i].id}/tracks`, tracks)
-                            console.log(tracks)
+                            getItems(`${api}/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
+                                console.log(tracks)
+                                createCollage(tracks)
+                            })
                         }, false);
                     }
                 });
@@ -138,26 +151,6 @@
             $('#login').show();
             $('#loggedin').hide();
         }
-    }
-
-    const getItems = (url, array) => { //get a user's playlists or the tracks in a playlist from a request
-        makeRequest(url).done(data => {
-            for (let i = 0; i < data.items.length; i++) {
-                array.push(data.items[i])
-            }
-            if (data.next !== null) {
-                getItems(data.next, array)
-            }
-        })
-    }
-
-    const createCollage = tracks => {
-        let freq = new Map()
-        for (let i = 0; i < tracks.length; i++) {
-            console.log(tracks[i])
-            freq.set(tracks[i].track.album.images[0], freq.get(tracks[i].track.album.images[0]) + 1 || 1)
-        }
-        console.log(freq)
     }
 </script>
 </body>
