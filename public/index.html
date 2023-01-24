@@ -69,7 +69,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script type="module">
-    import {createCollage} from './collage.js'
+    import {createCollage} from './collage.js';
 
     const getHashParams = () => {
         let hashParams = {};
@@ -90,7 +90,7 @@
             data: {
                 'limit': limit
             }
-        })
+        });
     }
 
     const getItems = (url, array) => { //get a user's playlists or the tracks in a playlist
@@ -112,9 +112,9 @@
     const access_token = params.access_token,
         error = params.error;
 
-    const api = 'https://api.spotify.com/v1'
-    let userID, limit = 50
-    let playlists = [], tracks
+    const api = 'https://api.spotify.com/v1';
+    let userID, limit = 50;
+    let playlists = [], tracks;
 
     if (error) {
         alert('There was an error during the authentication');
@@ -126,23 +126,23 @@
                 $('#loggedin').show();
 
                 getItems(`${api}/users/${user.id}/playlists`, playlists).done(() => {
-                    document.body.innerHTML += '<hr color="black">' //doesn't work
+                    document.body.innerHTML += '<hr color="black">' //attr doesn't work
                     for (let i = 0; i < playlists.length; i++) {
                         document.body.innerHTML +=
                             '<div id=pl-container style="padding-bottom: 10px; padding-top: 10px">' +
                             '<div id="pl-name" style="padding-right: 100px;">' + playlists[i].name + '</div>' +
                             '<div id="pl-cover"><img src=' + playlists[i].images[0].url + ' width=150 height=150></div>' +
                             '<div id="pl-button"><button id="collage-btn' + i + '">Create collage</button></div>' +
-                            '</div>'
+                            '</div>';
                     }
 
                     for (let i = 0; i < playlists.length; i++) {
                         document.getElementById('collage-btn' + i).addEventListener('click', () => {
-                            tracks = []
+                            tracks = [];
                             getItems(`${api}/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
-                                console.log(tracks)
-                                createCollage(tracks)
-                            })
+                                console.log(tracks);
+                                createCollage(tracks);
+                            });
                         }, false);
                     }
                 });
