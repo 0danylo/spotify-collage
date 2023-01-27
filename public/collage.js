@@ -1,62 +1,46 @@
-let frequencies = new Map();
-let topFreq = [];
-let numCovers = 4; //number of album covers shown in the collage
+const numCovers = 4; //number of album covers shown in the collage
+let frequencies, topFreqs;
+let prevLow; //the previous low value
 
 export const createCollage = tracks => {
+    frequencies = new Map();
+    topFreqs = [];
+    prevLow = -1;
     for (let i = 0; i < numCovers; i++) {
-        topFreq.push({
+        topFreqs[i] = {
             url: '',
             freq: 0
-        });
+        };
     }
 
-    for (const key in tracks) {
-        const url = key.track.album.images[0].url;
+    for (let i = 0; i < tracks.length; i++) {
+        const url = tracks[i].track.album.images[0].url;
         const freq = frequencies.has(url) ? frequencies.get(url) + 1 : 1;
-
         frequencies.set(url, freq);
     }
 
-    for (const freq in frequencies) {
-        if (frequencies.get(url) > topFreq[numCovers - 1].freq) {
-            addToTopFreq({url, freq});
-        }
+    for (const url of frequencies.keys()) {
+        const freq = frequencies.get(url);
+        addToTopFreqs(url, freq);
     }
-    console.log(topFreq);
+
+    return topFreqs;
 }
 
-/*
-    does not work because the newly added object has a frequency 1 higher than one
-    already in the array with the same url.
+const addToTopFreqs = (url, freq) => {
+    let lowFreq = Number.MAX_SAFE_INTEGER, lowIndex = -1;
+    //if the freq. to be added is less than the previous smallest one, skip
+    if (freq > prevLow) {
+        for (let i = 0; i < numCovers; i++) {
+            let curFreq = topFreqs[i].freq;
+            if (curFreq < lowFreq) {
+                lowIndex = i;
+                lowFreq = curFreq;
+            }
+        }
 
-    need to only examine the url and replace
-*/
-const addToTopFreq = ({url, freq}) => {
-    let newFreq = {
-        url: url,
-        freq: freq
+        prevLow = lowFreq;
+        if (topFreqs[lowIndex].freq < freq)
+            topFreqs[lowIndex] = {url, freq};
     }
-    console.log(newFreq)
-    let newPushed = false
-
-    if (!topFreq.some(c => c.url === url)) {
-        //if it's not already in the array, add the cover to the end
-        topFreq.push(newFreq)
-        newPushed = true
-    }
-
-    let i = topFreq.findIndex(c => c.url === url)
-    if (!newPushed)
-        topFreq[i - 1].freq += 1
-    for (i; i > 0; i--) {
-        if (topFreq[i].freq > topFreq[i - 1].freq) {
-            let temp = topFreq[i]
-            topFreq[i] = topFreq[i - 1]
-            topFreq[i - 1] = temp
-        } else break;
-    }
-
-    if (newPushed)
-        //remove the now least frequent (last) cover from the array
-        topFreq = topFreq.slice(0, numCovers)
 }

@@ -8,7 +8,7 @@
             display: none;
         }
 
-        #pl-name, #pl-cover, #pl-button {
+        #pl-name, #pl-cover, #pl-button, #result {
             display: inline-block;
             *display: inline;
             zoom: 1;
@@ -23,6 +23,10 @@
         #pl-name {
             text-align: right;
             font-size: 20px;
+        }
+
+        #result {
+            visibility: hidden;
         }
     </style>
 </head>
@@ -113,8 +117,7 @@
         error = params.error;
 
     const api = 'https://api.spotify.com/v1';
-    let userID, limit = 50;
-    let playlists = [], tracks;
+    let limit = 50, playlists = [], tracks, topCovers;
 
     if (error) {
         alert('There was an error during the authentication');
@@ -133,6 +136,7 @@
                             '<div id="pl-name" style="padding-right: 100px;">' + playlists[i].name + '</div>' +
                             '<div id="pl-cover"><img src=' + playlists[i].images[0].url + ' width=150 height=150></div>' +
                             '<div id="pl-button"><button id="collage-btn' + i + '">Create collage</button></div>' +
+                            '<div id="result"><img id="result' + i + '" src="https://i.gifer.com/origin/34/34338d26023e5515f6cc8969aa027bca_w200.gif" width=50 height=50></div>' +
                             '</div>';
                     }
 
@@ -140,8 +144,11 @@
                         document.getElementById('collage-btn' + i).addEventListener('click', () => {
                             tracks = [];
                             getItems(`${api}/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
-                                console.log(tracks);
-                                createCollage(tracks);
+                                document.getElementById('result' + i).style.visibility = "visible"
+                                topCovers = createCollage(tracks);
+                                for (const cover of topCovers) {
+                                    //change the loading gif to a collage of the covers in topCovers (html)
+                                }
                             });
                         }, false);
                     }
