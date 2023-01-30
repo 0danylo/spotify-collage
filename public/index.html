@@ -72,6 +72,7 @@
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="https://unpkg.com/merge-images"></script>
 <script type="module">
     import {createCollage} from './collage.js';
 
@@ -146,9 +147,14 @@
                             getItems(`${api}/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
                                 document.getElementById('result' + i).style.visibility = "visible"
                                 topCovers = createCollage(tracks);
+                                let coverURLs = []
                                 for (const cover of topCovers) {
                                     //change the loading gif to a collage of the covers in topCovers (html)
+                                    coverURLs.push(cover.url)
                                 }
+                                mergeImages(coverURLs).then(b64 => {
+                                    console.log(b64)
+                                })
                             });
                         }, false);
                     }
