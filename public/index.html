@@ -51,20 +51,7 @@
         </div>
         <div class="media-body">
             <dl class="dl-horizontal">
-                <dt>Display name</dt>
-                <dd class="clearfix">{{display_name}}</dd>
-                <dt>Id</dt>
-                <dd>{{id}}</dd>
-                <dt>Email</dt>
-                <dd>{{email}}</dd>
-                <dt>Spotify URI</dt>
-                <dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
-                <dt>Link</dt>
-                <dd><a href="{{href}}">{{href}}</a></dd>
-                <dt>Profile Image</dt>
-                <dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
-                <dt>Country</dt>
-                <dd>{{country}}</dd>
+
             </dl>
         </div>
     </div>
@@ -137,7 +124,7 @@
                             '<div id="pl-name" style="padding-right: 100px;">' + playlists[i].name + '</div>' +
                             '<div id="pl-cover"><img src=' + playlists[i].images[0].url + ' width=150 height=150></div>' +
                             '<div id="pl-button"><button id="collage-btn' + i + '">Create collage</button></div>' +
-                            '<div id="result"><img id="result' + i + '" src="https://i.gifer.com/origin/34/34338d26023e5515f6cc8969aa027bca_w200.gif" width=50 height=50></div>' +
+                            '<div id="result"><canvas id="result' + i + '" width=600 height=600></div>' +
                             '</div>';
                     }
 
@@ -145,16 +132,20 @@
                         document.getElementById('collage-btn' + i).addEventListener('click', () => {
                             tracks = [];
                             getItems(`${api}/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
-                                document.getElementById('result' + i).style.visibility = "visible"
+                                document.getElementById('result' + i).style.visibility = "visible";
                                 topCovers = createCollage(tracks);
-                                let coverURLs = []
-                                for (const cover of topCovers) {
-                                    //change the loading gif to a collage of the covers in topCovers (html)
-                                    coverURLs.push(cover.url)
+
+                                const side = Math.sqrt(topCovers.length);
+                                const ctx = document.getElementById('result' + i).getContext("2d");
+                                for (let x = 0; x < side; x++) {
+                                    for (let y = 0; y < side; y++) {
+                                        let img = new Image();
+                                        img.src = topCovers[side * x + y].url;
+                                        img.onload = () => {
+                                            ctx.drawImage(img, x * 300, y * 300);
+                                        };
+                                    }
                                 }
-                                mergeImages(coverURLs).then(b64 => {
-                                    console.log(b64)
-                                })
                             });
                         }, false);
                     }

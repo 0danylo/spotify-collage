@@ -14,7 +14,7 @@ export const createCollage = tracks => {
     }
 
     for (let i = 0; i < tracks.length; i++) {
-        const url = tracks[i].track.album.images[0].url;
+        const url = tracks[i].track.album.images[1].url; //0: 640px, 1: 300px, 2: 64px
         const freq = frequencies.has(url) ? frequencies.get(url) + 1 : 1;
         frequencies.set(url, freq);
     }
@@ -23,7 +23,7 @@ export const createCollage = tracks => {
         const freq = frequencies.get(url);
         addToTopFreqs(url, freq);
     }
-
+    console.log(topFreqs);
     return topFreqs;
 }
 
@@ -43,4 +43,8 @@ const addToTopFreqs = (url, freq) => {
         if (topFreqs[lowIndex].freq < freq)
             topFreqs[lowIndex] = {url, freq};
     }
+    //secondary sort by length of songs; dont remove songs with the same freq,
+    //and then only keep the highest total length of the songs with that freq
+    //use either a list of urls instead of each url or a map of url to song
+    //can only find all urls with same freq AFTER topfreqs is complete
 }
