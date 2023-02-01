@@ -1,4 +1,4 @@
-const numCovers = 4; //number of album covers shown in the collage
+const numCovers = 9; //number of album covers shown in the collage
 let frequencies, topFreqs;
 let prevLow; //the previous low value
 
@@ -45,6 +45,7 @@ const addToTopFreqs = (url, freq) => {
     }
     //secondary sort by length of songs; dont remove songs with the same freq,
     //and then only keep the highest total length of the songs with that freq
+
     //use either a list of urls instead of each url or a map of url to song
-    //can only find all urls with same freq AFTER topfreqs is complete
+    //but can only find all urls with same freq AFTER topfreqs is complete
 }

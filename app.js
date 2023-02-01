@@ -61,7 +61,7 @@ app.get('/callback', (req, res) => { //request access token
                     grant_type: 'authorization_code'
                 },
                 headers: {
-                    'Authorization': `Basic ${Buffer.from(clientID + ':' + clientSecret).toString('base64')}`
+                    'Authorization': 'Basic ' + Buffer.from(clientID + ':' + clientSecret).toString('base64')
                 },
                 json: true
             };

@@ -73,7 +73,7 @@
         return hashParams;
     }
 
-    const makeRequest = url => { //make a request for a user, their playlists, or a playlist's tracks
+    const makeRequest = url => { //make a request for a user, playlists, or a playlist's tracks
         return $.ajax({
             url: url,
             headers: {
@@ -105,33 +105,34 @@
         error = params.error;
 
     const api = 'https://api.spotify.com/v1';
-    let limit = 50, playlists = [], tracks, topCovers;
+    let playlists = [], tracks, topCovers;
+    const limit = 50, coverSize = 600;
 
     if (error) {
         alert('There was an error during the authentication');
     } else {
         if (access_token) {
-            makeRequest(`${api}/me`).done(user => {
+            makeRequest(api + '/me').done(user => {
                 userProfilePlaceholder.innerHTML = userProfileTemplate(user);
                 $('#login').hide();
                 $('#loggedin').show();
 
-                getItems(`${api}/users/${user.id}/playlists`, playlists).done(() => {
-                    document.body.innerHTML += '<hr color="black">' //attr doesn't work
+                getItems(api + `/users/${user.id}/playlists`, playlists).done(() => {
+                    document.body.innerHTML += '<hr color="black">'; //attr doesn't work
                     for (let i = 0; i < playlists.length; i++) {
                         document.body.innerHTML +=
                             '<div id=pl-container style="padding-bottom: 10px; padding-top: 10px">' +
-                            '<div id="pl-name" style="padding-right: 100px;">' + playlists[i].name + '</div>' +
-                            '<div id="pl-cover"><img src=' + playlists[i].images[0].url + ' width=150 height=150></div>' +
-                            '<div id="pl-button"><button id="collage-btn' + i + '">Create collage</button></div>' +
-                            '<div id="result"><canvas id="result' + i + '" width=600 height=600></div>' +
+                            `<div id="pl-name" style="padding-right: 100px;">${playlists[i].name}</div>` +
+                            `<div id="pl-cover"><img src=${playlists[i].images[0].url} width=150 height=150></div>` +
+                            `<div id="pl-button"><button id="collage-btn${i}">Create collage</button></div>` +
+                            `<div id="result"><canvas id="result${i}" width=${coverSize} height=${coverSize}></div>` +
                             '</div>';
                     }
 
                     for (let i = 0; i < playlists.length; i++) {
                         document.getElementById('collage-btn' + i).addEventListener('click', () => {
                             tracks = [];
-                            getItems(`${api}/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
+                            getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
                                 document.getElementById('result' + i).style.visibility = "visible";
                                 topCovers = createCollage(tracks);
 
@@ -142,7 +143,7 @@
                                         let img = new Image();
                                         img.src = topCovers[side * x + y].url;
                                         img.onload = () => {
-                                            ctx.drawImage(img, x * 300, y * 300);
+                                            ctx.drawImage(img, x * 200, y * 200, 200, 200);
                                         };
                                     }
                                 }
