@@ -1,6 +1,6 @@
 const numCovers = 9; //number of album covers shown in the collage
 let frequencies, topFreqs;
-let prevLow; //the previous low value
+let prevLow; //the previous low value; only increases as topFreqs is made
 
 export const createCollage = tracks => {
     frequencies = new Map();
@@ -23,6 +23,11 @@ export const createCollage = tracks => {
         const freq = frequencies.get(url);
         addToTopFreqs(url, freq);
     }
+
+    //must count the number of cover with lowest freq (JUST prevLow)
+    //then find all with that freq, compare, and replace with covers in topFreqs
+
+
     console.log(topFreqs);
     return topFreqs;
 }
@@ -43,9 +48,8 @@ const addToTopFreqs = (url, freq) => {
         if (topFreqs[lowIndex].freq < freq)
             topFreqs[lowIndex] = {url, freq};
     }
-    //secondary sort by length of songs; dont remove songs with the same freq,
-    //and then only keep the highest total length of the songs with that freq
+}
 
-    //use either a list of urls instead of each url or a map of url to song
-    //but can only find all urls with same freq AFTER topfreqs is complete
+const updateLowest = () => {
+
 }
