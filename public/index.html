@@ -1,14 +1,18 @@
 <!doctype html>
 <html>
+
 <head>
     <title>Spotify Playlist Collage</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <style type="text/css">
-        #login, #loggedin {
+        #login,
+        #loggedin {
             display: none;
         }
 
-        #pl-name, #pl-cover, #pl-button, #result {
+        #pl-name,
+        #pl-cover,
+        #pl-button {
             display: inline-block;
             *display: inline;
             zoom: 1;
@@ -28,22 +32,41 @@
         #result {
             visibility: hidden;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 10%;
+            top: 10%;
+            width: 80%;
+            height: 80%;
+            background-color: rgb(0, 0, 0, 0);
+        }
+
+        .modal-content {
+            background-color: #202020;
+            margin: 25px auto;
+            padding: 25px;
+            border: 1px solid #E0E0E0;
+            width: 80%;
+        }
     </style>
 </head>
 
 <body style="background-color: #202020; color: #E0E0E0">
-<div class="container">
-    <div id="login">
-        <h1>Playlist Collage</h1>
-        <a href="/login" class="btn btn-primary">Log in with Spotify</a>
-    </div>
-    <div id="loggedin">
-        <div id="user-profile">
+    <div class="container">
+        <div id="login">
+            <h1>Playlist Collage</h1>
+            <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+        </div>
+        <div id="loggedin">
+            <div id="user-profile">
+            </div>
         </div>
     </div>
-</div>
 
-<script id="user-profile-template" type="text/x-handlebars-template">
+    <script id="user-profile-template" type="text/x-handlebars-template">
     <h1>Logged in as {{display_name}}</h1>
     <div class="media">
         <div class="pull-left">
@@ -57,106 +80,116 @@
     </div>
 </script>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
-<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-<script src="https://unpkg.com/merge-images"></script>
-<script type="module">
-    import {createCollage} from './collage.js';
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="https://unpkg.com/merge-images"></script>
+    <script type="module">
+        import { createCollage } from './collage.js';
 
-    const getHashParams = () => {
-        let hashParams = {};
-        let e, r = /([^&;=]+)=?([^&;]*)/g,
-            q = window.location.hash.substring(1);
-        while (e = r.exec(q)) {
-            hashParams[e[1]] = decodeURIComponent(e[2]);
+        const getHashParams = () => {
+            let hashParams = {};
+            let e, r = /([^&;=]+)=?([^&;]*)/g,
+                q = window.location.hash.substring(1);
+            while (e = r.exec(q)) {
+                hashParams[e[1]] = decodeURIComponent(e[2]);
+            }
+            return hashParams;
         }
-        return hashParams;
-    }
 
-    const makeRequest = url => { //make a request for a user, playlists, or a playlist's tracks
-        return $.ajax({
-            url: url,
-            headers: {
-                'Authorization': 'Bearer ' + access_token
-            },
-            data: {
-                'limit': limit
-            }
-        });
-    }
-
-    const getItems = (url, array) => { //get a user's playlists or the tracks in a playlist
-        return makeRequest(url).then(data => {
-            for (let i = 0; i < data.items.length; i++) {
-                array.push(data.items[i])
-            }
-            if (data.next !== null) {
-                return getItems(data.next, array)
-            }
-        })
-    }
-
-    let userProfileSource = document.getElementById('user-profile-template').innerHTML,
-        userProfileTemplate = Handlebars.compile(userProfileSource),
-        userProfilePlaceholder = document.getElementById('user-profile');
-
-    const params = getHashParams();
-    const access_token = params.access_token,
-        error = params.error;
-
-    const api = 'https://api.spotify.com/v1';
-    let playlists = [], tracks, topCovers;
-    const limit = 50, coverSize = 600;
-
-    if (error) {
-        alert('There was an error during the authentication');
-    } else {
-        if (access_token) {
-            makeRequest(api + '/me').done(user => {
-                userProfilePlaceholder.innerHTML = userProfileTemplate(user);
-                $('#login').hide();
-                $('#loggedin').show();
-
-                getItems(api + `/users/${user.id}/playlists`, playlists).done(() => {
-                    document.body.innerHTML += '<hr color="black">'; //attr doesn't work
-                    for (let i = 0; i < playlists.length; i++) {
-                        document.body.innerHTML +=
-                            '<div id=pl-container style="padding-bottom: 10px; padding-top: 10px">' +
-                            `<div id="pl-name" style="padding-right: 100px;">${playlists[i].name}</div>` +
-                            `<div id="pl-cover"><img src=${playlists[i].images[0].url} width=150 height=150></div>` +
-                            `<div id="pl-button"><button id="collage-btn${i}">Create collage</button></div>` +
-                            `<div id="result"><canvas id="result${i}" width=${coverSize} height=${coverSize}></div>` +
-                            '</div>';
-                    }
-
-                    for (let i = 0; i < playlists.length; i++) {
-                        document.getElementById('collage-btn' + i).addEventListener('click', () => {
-                            tracks = [];
-                            getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
-                                document.getElementById('result' + i).style.visibility = "visible";
-                                topCovers = createCollage(tracks);
-
-                                const side = Math.sqrt(topCovers.length);
-                                const ctx = document.getElementById('result' + i).getContext("2d");
-                                for (let x = 0; x < side; x++) {
-                                    for (let y = 0; y < side; y++) {
-                                        let img = new Image();
-                                        img.src = topCovers[side * x + y].url;
-                                        img.onload = () => {
-                                            ctx.drawImage(img, x * 200, y * 200, 200, 200);
-                                        };
-                                    }
-                                }
-                            });
-                        }, false);
-                    }
-                });
+        const makeRequest = url => { //make a request for a user, playlists, or a playlist's tracks
+            return $.ajax({
+                url: url,
+                headers: {
+                    'Authorization': 'Bearer ' + access_token
+                },
+                data: {
+                    'limit': limit
+                }
             });
-        } else { //authentication unsuccessful
-            $('#login').show();
-            $('#loggedin').hide();
         }
-    }
-</script>
+
+        const getItems = (url, array) => { //get a user's playlists or the tracks in a playlist
+            return makeRequest(url).then(data => {
+                for (let i = 0; i < data.items.length; i++) {
+                    array.push(data.items[i]);
+                }
+                if (data.next !== null) {
+                    return getItems(data.next, array);
+                }
+            })
+        }
+
+        let userProfileSource = document.getElementById('user-profile-template').innerHTML,
+            userProfileTemplate = Handlebars.compile(userProfileSource),
+            userProfilePlaceholder = document.getElementById('user-profile');
+
+        const params = getHashParams();
+        const access_token = params.access_token,
+            error = params.error;
+
+        const api = 'https://api.spotify.com/v1';
+        let playlists = [], tracks, topCovers;
+        const limit = 50, coverSize = 1000;
+
+        if (error) {
+            alert('There was an error during the authentication');
+        } else {
+            if (access_token) {
+                makeRequest(api + '/me').done(user => {
+                    userProfilePlaceholder.innerHTML = userProfileTemplate(user);
+                    $('#login').hide();
+                    $('#loggedin').show();
+
+                    getItems(api + `/users/${user.id}/playlists`, playlists).done(() => {
+                        document.body.innerHTML += '<hr>';
+                        for (let i = 0; i < playlists.length; i++) {
+                            document.body.innerHTML += `
+                                <div id=pl-container style="padding-bottom: 10px; padding-top: 10px">
+                                <div id="pl-name" style="padding-right: 100px;">${playlists[i].name}</div>
+                                <div id="pl-cover"><img src=${playlists[i].images[0].url} width=150 height=150></div>
+                                <div id="pl-button"><button id="collage-btn${i}">Create collage</button></div>
+                                </div>
+                            `;
+                        }
+                        //add a modal for the collage result
+                        document.body.innerHTML += `
+                            <div id="resultModal" class="modal">
+                                <div class="modal-content">
+                                    <span class="close">&times;</span>
+                                    <canvas id="result" width="${coverSize}" height="${coverSize}"></canvas>
+                                </div>
+                            </div>
+                        `;
+
+                        for (let i = 0; i < playlists.length; i++) {
+                            document.getElementById('collage-btn' + i).addEventListener('click', () => {
+                                tracks = [];
+                                getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
+                                    document.getElementById('resultModal').style.display = "block";
+                                    topCovers = createCollage(tracks);
+
+                                    const side = Math.sqrt(topCovers.length);
+                                    const ctx = document.getElementById('result').getContext("2d");
+                                    for (let x = 0; x < side; x++) {
+                                        for (let y = 0; y < side; y++) {
+                                            let img = new Image();
+                                            img.src = topCovers[side * x + y].url;
+                                            img.onload = () => {
+                                                ctx.drawImage(img, x * 200, y * 200, 200, 200);
+                                            };
+                                        }
+                                    }
+                                });
+                            }, false);
+                        }
+                    });
+                });
+            } else { //authentication unsuccessful
+                $('#login').show();
+                $('#loggedin').hide();
+            }
+        }
+    </script>
 </body>
+
 </html>
