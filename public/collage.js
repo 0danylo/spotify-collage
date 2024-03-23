@@ -1,4 +1,4 @@
-const numCovers = 9; //number of album covers shown in the collage
+export const numCovers = 9;
 let frequencies, lengths, topCovers;
 let prevLowFreq, prevLowLen; //the previous low value; only increases as topFreqs is made
 

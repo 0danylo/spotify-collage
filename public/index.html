@@ -12,7 +12,8 @@
 
         #pl-name,
         #pl-cover,
-        #pl-button {
+        #pl-button,
+        #result {
             display: inline-block;
             *display: inline;
             zoom: 1;
@@ -33,24 +34,6 @@
             visibility: hidden;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 10%;
-            top: 10%;
-            width: 80%;
-            height: 80%;
-            background-color: rgb(0, 0, 0, 0);
-        }
-
-        .modal-content {
-            background-color: #202020;
-            margin: 25px auto;
-            padding: 25px;
-            border: 1px solid #E0E0E0;
-            width: 80%;
-        }
     </style>
 </head>
 
@@ -83,7 +66,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script type="module">
-        import { createCollage } from './collage.js';
+        import { createCollage, numCovers } from './collage.js';
 
         const getHashParams = () => {
             let hashParams = {};
@@ -95,7 +78,7 @@
             return hashParams;
         }
 
-        const makeRequest = url => { //make a request for a user, playlists, or a playlist's tracks
+        const makeRequest = url => {
             return $.ajax({
                 url: url,
                 headers: {
@@ -107,7 +90,7 @@
             });
         }
 
-        const getItems = (url, array) => { //get a user's playlists or the tracks in a playlist
+        const getItems = (url, array) => {
             return makeRequest(url).then(data => {
                 for (let i = 0; i < data.items.length; i++) {
                     array.push(data.items[i]);
@@ -128,7 +111,7 @@
 
         const api = 'https://api.spotify.com/v1';
         let playlists = [], tracks, topCovers;
-        const limit = 50, coverSize = 1000;
+        const limit = 50, displaySize = 150, actualSize = 300;
 
         if (error) {
             alert('There was an error during the authentication');
@@ -140,41 +123,44 @@
                     $('#loggedin').show();
 
                     getItems(api + `/users/${user.id}/playlists`, playlists).done(() => {
+                        playlists = playlists.filter((pl) => pl.tracks.total > 0)
                         document.body.innerHTML += '<hr>';
                         for (let i = 0; i < playlists.length; i++) {
-                            document.body.innerHTML += `
+                            document.body.innerHTML +=
+                                `
                                 <div id=pl-container style="padding-bottom: 10px; padding-top: 10px">
-                                <div id="pl-name" style="padding-right: 100px;">${playlists[i].name}</div>
-                                <div id="pl-cover"><img src=${playlists[i].images[0].url} width=150 height=150></div>
-                                <div id="pl-button"><button id="collage-btn${i}">Create collage</button></div>
+                                    <div id="pl-name" style="padding-right: 100px;">
+                                        ${playlists[i].name}
+                                    </div>
+                                    <div id="pl-cover">
+                                        <img src=${playlists[i].images[0].url} width=${displaySize} height=${displaySize}>
+                                    </div>
+                                    <div id="pl-button">
+                                        <button id="collage-btn${i}">Create collage</button>
+                                    </div>
+                                    <div id="result">
+                                        <canvas id="result${i}" width=${actualSize} height=${actualSize} style="width: ${displaySize}px; height: ${displaySize}px;">
+                                    </div>
                                 </div>
-                            `;
+                                `;
                         }
-                        //add a modal for the collage result
-                        document.body.innerHTML += `
-                            <div id="resultModal" class="modal">
-                                <div class="modal-content">
-                                    <span class="close">&times;</span>
-                                    <canvas id="result" width="${coverSize}" height="${coverSize}"></canvas>
-                                </div>
-                            </div>
-                        `;
 
                         for (let i = 0; i < playlists.length; i++) {
                             document.getElementById('collage-btn' + i).addEventListener('click', () => {
                                 tracks = [];
                                 getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
-                                    document.getElementById('resultModal').style.display = "block";
+                                    document.getElementById('result' + i).style.visibility = "visible";
                                     topCovers = createCollage(tracks);
 
-                                    const side = Math.sqrt(topCovers.length);
-                                    const ctx = document.getElementById('result').getContext("2d");
+                                    const side = topCovers.length == 4 ? 2 : 3
+                                    const tileSize = actualSize / side
+                                    const ctx = document.getElementById('result' + i).getContext("2d");
                                     for (let x = 0; x < side; x++) {
                                         for (let y = 0; y < side; y++) {
                                             let img = new Image();
                                             img.src = topCovers[side * x + y].url;
                                             img.onload = () => {
-                                                ctx.drawImage(img, x * 200, y * 200, 200, 200);
+                                                ctx.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize);
                                             };
                                         }
                                     }
@@ -183,7 +169,7 @@
                         }
                     });
                 });
-            } else { //authentication unsuccessful
+            } else {
                 $('#login').show();
                 $('#loggedin').hide();
             }

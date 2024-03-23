@@ -11,7 +11,7 @@ const redirectURI = 'http://localhost:8888/callback'
 const stateKey = 'spotify_auth_state';
 const app = express();
 
-const generateRandomString = length => { //generate random string
+const generateRandomString = length => {
     let text = '';
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -26,7 +26,6 @@ app.use(express.static(__dirname + '/public'))
     .use(cookieParser());
 
 app.get('/login', (req, res) => {
-
     const state = generateRandomString(16);
     res.cookie(stateKey, state);
 
@@ -41,7 +40,7 @@ app.get('/login', (req, res) => {
         }));
 });
 
-app.get('/callback', (req, res) => { //request access token
+app.get('/callback', (req, res) => {
         const code = req.query.code || null;
         const state = req.query.state || null;
         const storedState = req.cookies ? req.cookies[stateKey] : null;
