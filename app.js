@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser')
 
 const clientID = 'b73bb6d645664a5c8648994b4b95a763'
 const clientSecret = require('./client-secret.js')
-const redirectURI = 'https://spotify-collage.vercel.app/callback'
+const redirectURI = 'http://localhost:8888/callback'
 
 const stateKey = 'spotify_auth_state';
 const app = express();
