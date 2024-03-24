@@ -1,4 +1,4 @@
-export const numCovers = 9;
+export const numCovers = 4;
 let frequencies, lengths, topCovers;
 let prevLowFreq, prevLowLen; //the previous low value; only increases as topFreqs is made
 
@@ -18,7 +18,7 @@ export const createCollage = tracks => {
         const url = tracks[i].track.album.images[1].url; //0: 640px, 1: 300px, 2: 64px
         const freq = frequencies.has(url) ? frequencies.get(url) + 1 : 1;
         const length = lengths.has(url) ? lengths.get(url) +
-            tracks[i].track.duration_ms : tracks[i].track.duration_ms; //??
+            tracks[i].track.duration_ms : tracks[i].track.duration_ms;
 
         frequencies.set(url, freq);
         lengths.set(url, length);
@@ -30,7 +30,15 @@ export const createCollage = tracks => {
         addToTopCovers(url, freq, length);
     }
 
-    console.log(topCovers);
+    for (let i = 0; i < numCovers; i++) {
+        for (let j = 0; j < numCovers; j++) {
+            if (i != j && topCovers[i].url == topCovers[j].url) {
+                console.log("Duplicate found");
+                console.log(topCovers[i]);
+            }
+        }
+    }
+
     return topCovers;
 }
 

@@ -15,14 +15,8 @@
         #pl-button,
         #result {
             display: inline-block;
-            *display: inline;
             zoom: 1;
-            width: 25%;
-        }
-
-        #pl-button {
-            color: #202020;
-            font-size: 16px;
+            width: 33%;
         }
 
         #pl-name {
@@ -30,10 +24,24 @@
             font-size: 20px;
         }
 
-        #result {
-            visibility: hidden;
+        #pl-container {
+            padding-bottom: 5px;
+            padding-top: 5px;
+            height: 160;
         }
 
+        #pl-name {
+            padding-right: 100px;
+        }
+
+        #pl-cover {
+            width: 150;
+            height: 150;
+        }
+
+        #result {
+            top: 50%;
+        }
     </style>
 </head>
 
@@ -50,16 +58,16 @@
     </div>
 
     <script id="user-profile-template" type="text/x-handlebars-template">
-    <h1>Logged in as {{display_name}}</h1>
+    <h1>Hello, {{display_name}}</h1>
     <div class="media">
-        <div class="pull-left">
-            <img class="media-object" width="150" src="{{images.0.url}}"/>
+        <!-- <div class="pull-left">
+            <img class="media-object" width="150" src="{{images.1.url}}"/>
         </div>
         <div class="media-body">
             <dl class="dl-horizontal">
 
             </dl>
-        </div>
+        </div> -->
     </div>
 </script>
 
@@ -67,6 +75,8 @@
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script type="module">
         import { createCollage, numCovers } from './collage.js';
+
+        let trackMap = new Map();
 
         const getHashParams = () => {
             let hashParams = {};
@@ -78,7 +88,7 @@
             return hashParams;
         }
 
-        const makeRequest = url => {
+        const makeRequest = (url, limit) => {
             return $.ajax({
                 url: url,
                 headers: {
@@ -90,13 +100,13 @@
             });
         }
 
-        const getItems = (url, array) => {
-            return makeRequest(url).then(data => {
+        const getItems = (url, array, limit = 50) => {
+            return makeRequest(url, limit).then(data => {
                 for (let i = 0; i < data.items.length; i++) {
                     array.push(data.items[i]);
                 }
                 if (data.next !== null) {
-                    return getItems(data.next, array);
+                    return getItems(data.next, array, limit);
                 }
             })
         }
@@ -106,12 +116,11 @@
             userProfilePlaceholder = document.getElementById('user-profile');
 
         const params = getHashParams();
-        const access_token = params.access_token,
-            error = params.error;
+        const access_token = params.access_token, error = params.error;
 
         const api = 'https://api.spotify.com/v1';
-        let playlists = [], tracks, topCovers;
-        const limit = 50, displaySize = 150, actualSize = 300;
+        let playlists = [], topCovers;
+        const defaultLimit = 50, displaySize = 150, actualSize = 300;
 
         if (error) {
             alert('There was an error during the authentication');
@@ -124,33 +133,34 @@
 
                     getItems(api + `/users/${user.id}/playlists`, playlists).done(() => {
                         playlists = playlists.filter((pl) => pl.tracks.total > 0)
+                        console.log(playlists)
+
                         document.body.innerHTML += '<hr>';
                         for (let i = 0; i < playlists.length; i++) {
                             document.body.innerHTML +=
                                 `
-                                <div id=pl-container style="padding-bottom: 10px; padding-top: 10px">
-                                    <div id="pl-name" style="padding-right: 100px;">
+                                <div id=pl-container>
+                                    <div id="pl-name">
                                         ${playlists[i].name}
                                     </div>
                                     <div id="pl-cover">
                                         <img src=${playlists[i].images[0].url} width=${displaySize} height=${displaySize}>
                                     </div>
-                                    <div id="pl-button">
-                                        <button id="collage-btn${i}">Create collage</button>
-                                    </div>
                                     <div id="result">
-                                        <canvas id="result${i}" width=${actualSize} height=${actualSize} style="width: ${displaySize}px; height: ${displaySize}px;">
+                                        <canvas id="result${i}" width=${actualSize} height=${actualSize} 
+                                        style="width: ${displaySize}px; height: ${displaySize}px;">
                                     </div>
                                 </div>
                                 `;
                         }
 
                         for (let i = 0; i < playlists.length; i++) {
-                            document.getElementById('collage-btn' + i).addEventListener('click', () => {
-                                tracks = [];
-                                getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks).done(() => {
+                                let tracks = [];
+                                const s = Date.now()
+                                getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks, 100).done(() => {
+                                    console.log("end: " + (Date.now() - s)/1000)
                                     document.getElementById('result' + i).style.visibility = "visible";
-                                    topCovers = createCollage(tracks);
+                                    const topCovers = createCollage(tracks);
 
                                     const side = topCovers.length == 4 ? 2 : 3
                                     const tileSize = actualSize / side
@@ -165,7 +175,7 @@
                                         }
                                     }
                                 });
-                            }, false);
+                            
                         }
                     });
                 });
