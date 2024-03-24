@@ -30,15 +30,6 @@ export const createCollage = tracks => {
         addToTopCovers(url, freq, length);
     }
 
-    for (let i = 0; i < numCovers; i++) {
-        for (let j = 0; j < numCovers; j++) {
-            if (i != j && topCovers[i].url == topCovers[j].url) {
-                console.log("Duplicate found");
-                console.log(topCovers[i]);
-            }
-        }
-    }
-
     return topCovers;
 }
 
