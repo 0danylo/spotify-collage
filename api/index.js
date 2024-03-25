@@ -5,7 +5,7 @@ const querystring = require('querystring')
 const cookieParser = require('cookie-parser')
 
 const clientID = 'b73bb6d645664a5c8648994b4b95a763'
-// let clientSecret = require('./client-secret.js')
+const clientSecret = require('../client-secret.js')
 const redirectURI = 'http://localhost:3000/callback'
 
 const stateKey = 'spotify_auth_state';
@@ -22,18 +22,23 @@ const generateRandomString = length => {
     return text;
 };  
 
-console.log('clientID:', clientID)
-
 app.use(express.static(__dirname + '../public'))
     .use(cors())
     .use(cookieParser());
-
+    
 app.get('/login', (req, res) => {
     console.log('login')
     const state = generateRandomString(16);
     res.cookie(stateKey, state);
 
     const scope = 'playlist-read-private';
+    console.log(querystring.stringify({
+        response_type: 'code',
+        client_id: clientID,
+        scope: scope,
+        redirect_uri: redirectURI,
+        state: state
+    }))
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
             response_type: 'code',
@@ -65,7 +70,7 @@ app.get('/callback', (req, res) => {
                 grant_type: 'authorization_code'
             },
             headers: {
-                'Authorization': 'Basic ' + Buffer.from(clientID + ':' + require('../client-secret.js')).toString('base64')
+                'Authorization': 'Basic ' + Buffer.from(clientID + ':' + clientSecret).toString('base64')
             },
             json: true
         };
@@ -91,5 +96,4 @@ app.get('/callback', (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log("Server ready on port 3000."));
 module.exports = app;

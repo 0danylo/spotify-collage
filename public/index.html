@@ -123,6 +123,7 @@
         const defaultLimit = 50, displaySize = 150, actualSize = 300;
 
         if (error) {
+            console.log(access_token, error)
             alert('There was an error during the authentication');
         } else {
             if (access_token) {
