@@ -11,7 +11,6 @@ const redirectURI = 'http://spotify-collage.vercel.app/callback'
 const stateKey = 'spotify_auth_state';
 const app = express();
 
-
 const generateRandomString = length => {
     let text = '';
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -31,13 +30,6 @@ app.get('/login', (req, res) => {
     res.cookie(stateKey, state);
 
     const scope = 'playlist-read-private';
-    console.log(querystring.stringify({
-        response_type: 'code',
-        client_id: clientID,
-        scope: scope,
-        redirect_uri: redirectURI,
-        state: state
-    }))
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
             response_type: 'code',

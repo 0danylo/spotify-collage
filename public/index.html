@@ -123,7 +123,6 @@
         const defaultLimit = 50, displaySize = 150, actualSize = 300;
 
         if (error) {
-            console.log(access_token, error)
             alert('There was an error during the authentication');
         } else {
             if (access_token) {
@@ -134,7 +133,6 @@
 
                     getItems(api + `/users/${user.id}/playlists`, playlists).done(() => {
                         playlists = playlists.filter((pl) => pl.tracks.total > 0)
-                        console.log(playlists)
 
                         document.body.innerHTML += '<hr>';
                         for (let i = 0; i < playlists.length; i++) {
@@ -156,27 +154,26 @@
                         }
 
                         for (let i = 0; i < playlists.length; i++) {
-                            let tracks = [];
-                            const s = Date.now()
-                            getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks, 100).done(() => {
-                                console.log("end: " + (Date.now() - s) / 1000)
-                                document.getElementById('result' + i).style.visibility = "visible";
-                                const topCovers = createCollage(tracks);
+                                let tracks = [];
+                                const s = Date.now()
+                                getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks, 100).done(() => {
+                                    document.getElementById('result' + i).style.visibility = "visible";
+                                    const topCovers = createCollage(tracks);
 
-                                const side = topCovers.length == 4 ? 2 : 3
-                                const tileSize = actualSize / side
-                                const ctx = document.getElementById('result' + i).getContext("2d");
-                                for (let x = 0; x < side; x++) {
-                                    for (let y = 0; y < side; y++) {
-                                        let img = new Image();
-                                        img.src = topCovers[side * x + y].url;
-                                        img.onload = () => {
-                                            ctx.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize);
-                                        };
+                                    const side = topCovers.length == 4 ? 2 : 3
+                                    const tileSize = actualSize / side
+                                    const ctx = document.getElementById('result' + i).getContext("2d");
+                                    for (let x = 0; x < side; x++) {
+                                        for (let y = 0; y < side; y++) {
+                                            let img = new Image();
+                                            img.src = topCovers[side * x + y].url;
+                                            img.onload = () => {
+                                                ctx.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize);
+                                            };
+                                        }
                                     }
-                                }
-                            });
-
+                                });
+                            
                         }
                     });
                 });
