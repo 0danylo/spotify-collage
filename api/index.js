@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser')
 
 const clientID = 'b73bb6d645664a5c8648994b4b95a763'
 const clientSecret = require('../client-secret.js')
-const redirectURI = 'http://localhost:3000/callback'
+const redirectURI = 'http://spotify-collage.vercel.app/callback'
 
 const stateKey = 'spotify_auth_state';
 const app = express();
@@ -27,7 +27,6 @@ app.use(express.static(__dirname + '../public'))
     .use(cookieParser());
     
 app.get('/login', (req, res) => {
-    console.log('login')
     const state = generateRandomString(16);
     res.cookie(stateKey, state);
 
@@ -50,7 +49,6 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/callback', (req, res) => {
-    // console.log('callback')
     const code = req.query.code || null;
     const state = req.query.state || null;
     const storedState = req.cookies ? req.cookies[stateKey] : null;
