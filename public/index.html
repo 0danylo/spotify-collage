@@ -9,6 +9,12 @@
         #loggedin {
             display: none;
         }
+        
+        #pl-container {
+            padding-bottom: 5px;
+            padding-top: 5px;
+            height: 160;
+        }
 
         #pl-name,
         #pl-cover,
@@ -20,18 +26,9 @@
         }
 
         #pl-name {
+            padding-right: 100px;
             text-align: right;
             font-size: 20px;
-        }
-
-        #pl-container {
-            padding-bottom: 5px;
-            padding-top: 5px;
-            height: 160;
-        }
-
-        #pl-name {
-            padding-right: 100px;
         }
 
         #pl-cover {
@@ -40,7 +37,7 @@
         }
 
         #result {
-            top: 50%;
+            position: absolute;
         }
     </style>
 </head>
@@ -48,7 +45,7 @@
 <body style="background-color: #202020; color: #E0E0E0">
     <div class="container">
         <div id="login">
-            <h1>Playlist Collage</h1>
+            <h1> </h1>
             <a href="/login" class="btn btn-primary">Log in with Spotify</a>
         </div>
         <div id="loggedin">
@@ -70,7 +67,6 @@
         </div> -->
     </div>
 </script>
-
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="module">
@@ -132,10 +128,13 @@
                     $('#loggedin').show();
 
                     getItems(api + `/users/${user.id}/playlists`, playlists).done(() => {
-                        playlists = playlists.filter((pl) => pl.tracks.total > 0)
+                        playlists = playlists.filter((pl) => pl.tracks.total > 0 && pl.owner.id == user.id)
 
                         document.body.innerHTML += '<hr>';
                         for (let i = 0; i < playlists.length; i++) {
+                            let url = playlists[i].images.length == 1 ?
+                                playlists[i].images[0].url : playlists[i].images[1].url;
+
                             document.body.innerHTML +=
                                 `
                                 <div id=pl-container>
@@ -143,7 +142,7 @@
                                         ${playlists[i].name}
                                     </div>
                                     <div id="pl-cover">
-                                        <img src=${playlists[i].images[0].url} width=${displaySize} height=${displaySize}>
+                                        <img src=${url} width=${displaySize} height=${displaySize}>
                                     </div>
                                     <div id="result">
                                         <canvas id="result${i}" width=${actualSize} height=${actualSize} 
