@@ -5,14 +5,21 @@
     <title>Spotify Playlist Collage</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <style type="text/css">
-        #login,
+        #login {
+            display: flexbox;
+            padding: 50px;
+            flex-direction: column;
+            justify-content: center;
+            
+            text-align: center;
+        }
+
         #loggedin {
-            display: none;
+            display: inline;
         }
         
         #pl-container {
-            padding-bottom: 5px;
-            padding-top: 5px;
+            padding: 5px;
             height: 160;
         }
 
@@ -45,7 +52,7 @@
 <body style="background-color: #202020; color: #E0E0E0">
     <div class="container">
         <div id="login">
-            <h1> </h1>
+            <h1>Create Accurate Playlist Collages</h1>
             <a href="/login" class="btn btn-primary">Log in with Spotify</a>
         </div>
         <div id="loggedin">
@@ -56,16 +63,16 @@
 
     <script id="user-profile-template" type="text/x-handlebars-template">
     <h1>Hello, {{display_name}}</h1>
-    <div class="media">
-        <!-- <div class="pull-left">
+    <!-- <div class="media">
+        <div class="pull-left">
             <img class="media-object" width="150" src="{{images.1.url}}"/>
         </div>
         <div class="media-body">
             <dl class="dl-horizontal">
 
             </dl>
-        </div> -->
-    </div>
+        </div>
+    </div> -->
 </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
