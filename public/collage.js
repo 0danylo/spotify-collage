@@ -1,82 +1,47 @@
-export const numCovers = 4;
-let frequencies, lengths, topCovers;
-let prevLowFreq, prevLowLen; //the previous low value; only increases as topFreqs is made
+export const getTopCovers = tracks => {
+    let freqs = new Map();
 
-export const createCollage = tracks => {
-    frequencies = new Map();
-    lengths = new Map();
-    topCovers = [];
-    prevLowFreq = -1;
-    for (let i = 0; i < numCovers; i++) {
-        topCovers[i] = {
-            url: '',
-            freq: 0
-        };
-    }
+    tracks.forEach(track => {
+        const images = track.track.album.images;
+        if (images.length == 0)
+            return;
+        
+        const url = images[1].url;
 
-    for (let i = 0; i < tracks.length; i++) {
-        const url = tracks[i].track.album.images[1].url; //0: 640px, 1: 300px, 2: 64px
-        const freq = frequencies.has(url) ? frequencies.get(url) + 1 : 1;
-        const length = lengths.has(url) ? lengths.get(url) +
-            tracks[i].track.duration_ms : tracks[i].track.duration_ms;
+        if (freqs.has(url))
+            freqs.set(url, freqs.get(url) + 1);
+        else
+            freqs.set(url, 1);
+    });
 
-        frequencies.set(url, freq);
-        lengths.set(url, length);
-    }
+    freqs = new Map([...freqs.entries()].sort((a, b) => b[1] - a[1]));
 
-    for (const url of frequencies.keys()) {
-        const freq = frequencies.get(url);
-        const length = lengths.get(url);
-        addToTopCovers(url, freq, length);
-    }
-
-    return topCovers;
+    const numCovers = getNumCovers(Array.from(freqs.keys()));
+    return {
+        covers: Array.from(freqs.keys()).slice(0, numCovers),
+        sideLength: getSideLength(numCovers)
+    };
 }
 
-const addToTopCovers = (url, freq, length) => {
-    let lowFreq = Number.MAX_SAFE_INTEGER, lowIndex = -1;
-    //if the freq to be added is less than the previous smallest one, skip
-    if (freq > prevLowFreq) {
-        for (let i = 0; i < numCovers; i++) {
-            const curFreq = topCovers[i].freq;
-            if (curFreq < lowFreq) {
-                lowIndex = i;
-                lowFreq = curFreq;
-            } else if (curFreq == lowFreq) {
-                //if the frequency is the same, compare the total lengths
-                if (length > lengths.get(topCovers[i].url)) {
-                    lowIndex = i;
-                    lowFreq = curFreq;
-                }
-            }
-        }
+const getNumCovers = (tracks) => {
+    let len = tracks.length;
 
-        prevLowFreq = lowFreq;
-        if (topCovers[lowIndex].freq < freq)
-            topCovers[lowIndex] = { url, freq };
+    if (len < 4) {
+        return 1;
+    } else if (len < 100) {
+        return 4;
+    } else {
+        return 9;
     }
 }
 
-const addToTopCoversByLength = (url, freq, length) => {
-    let lowLen = Number.MAX_SAFE_INTEGER, lowIndex = -1;
-    //if the length to be added is less than the previous smallest one, skip
-    if (length > prevLowLen) {
-        for (let i = 0; i < numCovers; i++) {
-            const curLen = lengths.get(topCovers[i].url);
-            if (curLen < lowLen) {
-                lowIndex = i;
-                lowLen = curLen;
-            } else if (curLen == lowLen) {
-                //if the length is the same, compare the frequencies
-                if (freq > topCovers[i].freq) {
-                    lowIndex = i;
-                    lowLen = curLen;
-                }
-            }
-        }
-
-        prevLowLen = lowLen;
-        if (topCovers[lowIndex].freq < freq)
-            topCovers[lowIndex] = { url, freq };
+const getSideLength = (numCovers) => {
+    switch (numCovers) {
+        case 1:
+            return 1;
+        case 4:
+            return 2;
+        case 9:
+            return 3;
     }
 }

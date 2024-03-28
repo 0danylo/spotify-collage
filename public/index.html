@@ -77,7 +77,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="module">
-        import { createCollage, numCovers } from './collage.js';
+        import { getTopCovers } from './collage.js'
 
         let trackMap = new Map();
 
@@ -164,15 +164,16 @@
                             const s = Date.now()
                             getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks, 100).done(() => {
                                 document.getElementById('result' + i).style.visibility = "visible";
-                                const topCovers = createCollage(tracks);
 
-                                const side = topCovers.length == 4 ? 2 : 3
+                                const topCovers = getTopCovers(tracks);
+                                
+                                const side = topCovers.sideLength
                                 const tileSize = actualSize / side
                                 const ctx = document.getElementById('result' + i).getContext("2d");
                                 for (let x = 0; x < side; x++) {
                                     for (let y = 0; y < side; y++) {
                                         let img = new Image();
-                                        img.src = topCovers[side * x + y].url;
+                                        img.src = topCovers.covers[side * x + y];
                                         img.onload = () => {
                                             ctx.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize);
                                         };
