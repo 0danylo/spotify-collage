@@ -105,7 +105,6 @@
 
         const getPlaylists = (url, array) => {
             return makeRequest(url, 50).then(data => {
-                console.log(data)
                 for (let i = 0; i < data.items.length; i++) {
                     array.push(data.items[i]);
                 }
@@ -118,7 +117,6 @@
 
         const getTracks = (url, array) => {
             return makeRequest(url, 100).then(data => {
-                console.log(data)
                 for (let i = 0; i < data.items.length; i++) {
                     array.push(data.items[i]);
                 }
