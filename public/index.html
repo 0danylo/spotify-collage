@@ -103,13 +103,28 @@
             });
         }
 
-        const getItems = (url, array, limit = 50) => {
-            return makeRequest(url, limit).then(data => {
+        const getPlaylists = (url, array) => {
+            return makeRequest(url, 50).then(data => {
+                console.log(data)
                 for (let i = 0; i < data.items.length; i++) {
                     array.push(data.items[i]);
                 }
+
                 if (data.next !== null) {
-                    return getItems(data.next, array, limit);
+                    return getPlaylists(data.next, array, 50);
+                }
+            })
+        }
+
+        const getTracks = (url, array) => {
+            return makeRequest(url, 100).then(data => {
+                console.log(data)
+                for (let i = 0; i < data.items.length; i++) {
+                    array.push(data.items[i]);
+                }
+
+                if (data.next !== null) {
+                    return getTracks(data.next, array, 100);
                 }
             })
         }
@@ -123,7 +138,7 @@
 
         const api = 'https://api.spotify.com/v1';
         let playlists = [], topCovers;
-        const defaultLimit = 50, displaySize = 150, actualSize = 300;
+        const displaySize = 150, actualSize = 300;
 
         if (error) {
             alert('There was an error during the authentication');
@@ -134,7 +149,7 @@
                     $('#login').hide();
                     $('#loggedin').show();
 
-                    getItems(api + `/users/${user.id}/playlists`, playlists).done(() => {
+                    getPlaylists(api + `/users/${user.id}/playlists`, playlists).done(() => {
                         playlists = playlists.filter((pl) => pl.tracks.total > 0 && pl.owner.id == user.id)
 
                         document.body.innerHTML += '<hr>';
@@ -162,7 +177,7 @@
                         for (let i = 0; i < playlists.length; i++) {
                             let tracks = [];
                             const s = Date.now()
-                            getItems(api + `/playlists/${playlists[i].id}/tracks`, tracks, 100).done(() => {
+                            getTracks(api + `/playlists/${playlists[i].id}/tracks`, tracks, 100).done(() => {
                                 document.getElementById('result' + i).style.visibility = "visible";
 
                                 const topCovers = getTopCovers(tracks);
