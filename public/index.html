@@ -10,14 +10,14 @@
             padding: 50px;
             flex-direction: column;
             justify-content: center;
-            
+
             text-align: center;
         }
 
         #loggedin {
             display: inline;
         }
-        
+
         #pl-container {
             padding: 5px;
             height: 160;
@@ -25,10 +25,9 @@
 
         #pl-name,
         #pl-cover,
-        #pl-button,
+        #progress-bar,
         #result {
             display: inline-block;
-            zoom: 1;
             width: 33%;
         }
 
@@ -41,6 +40,12 @@
         #pl-cover {
             width: 150;
             height: 150;
+        }
+
+        .progress-bar {
+            /* width: 100px;
+            height: 20px;
+            background-color: #ddd; */
         }
 
         #result {
@@ -80,6 +85,7 @@
         import { getTopCovers } from './collage.js'
 
         let trackMap = new Map();
+        let playlistLimit = 50, trackLimit = 100;
 
         const getHashParams = () => {
             let hashParams = {};
@@ -91,38 +97,40 @@
             return hashParams;
         }
 
-        const makeRequest = (url, limit) => {
+        const makeRequest = (url, limit, offset) => {
             return $.ajax({
                 url: url,
                 headers: {
                     'Authorization': 'Bearer ' + access_token
                 },
                 data: {
-                    'limit': limit
+                    'limit': limit,
+                    'offset': offset
                 }
             });
         }
 
-        const getPlaylists = (url, array) => {
-            return makeRequest(url, 50).then(data => {
+        const getPlaylists = (url, array, offset) => {
+            return makeRequest(url, playlistLimit, offset).then(data => {
+                console.log(url)
                 for (let i = 0; i < data.items.length; i++) {
                     array.push(data.items[i]);
                 }
 
                 if (data.next !== null) {
-                    return getPlaylists(data.next, array, 50);
+                    return getPlaylists(url, array, offset + playlistLimit + 1);
                 }
             })
         }
 
         const getTracks = (url, array) => {
-            return makeRequest(url, 100).then(data => {
+            return makeRequest(url, trackLimit).then(data => {
                 for (let i = 0; i < data.items.length; i++) {
                     array.push(data.items[i]);
                 }
 
                 if (data.next !== null) {
-                    return getTracks(data.next, array, 100);
+                    return getTracks(data.next, array, trackLimit);
                 }
             })
         }
@@ -147,7 +155,7 @@
                     $('#login').hide();
                     $('#loggedin').show();
 
-                    getPlaylists(api + `/users/${user.id}/playlists`, playlists).done(() => {
+                    getPlaylists(api + `/users/${user.id}/playlists`, playlists, 0).done(() => {
                         playlists = playlists.filter((pl) => pl.tracks.total > 0 && pl.owner.id == user.id)
 
                         document.body.innerHTML += '<hr>';
@@ -164,6 +172,9 @@
                                     <div id="pl-cover">
                                         <img src=${url} width=${displaySize} height=${displaySize}>
                                     </div>
+                                    <div class="progress-bar">
+                                        
+                                    </div>
                                     <div id="result">
                                         <canvas id="result${i}" width=${actualSize} height=${actualSize} 
                                         style="width: ${displaySize}px; height: ${displaySize}px;">
@@ -176,10 +187,8 @@
                             let tracks = [];
                             const s = Date.now()
                             getTracks(api + `/playlists/${playlists[i].id}/tracks`, tracks, 100).done(() => {
-                                document.getElementById('result' + i).style.visibility = "visible";
-
                                 const topCovers = getTopCovers(tracks);
-                                
+
                                 const side = topCovers.sideLength
                                 const tileSize = actualSize / side
                                 const ctx = document.getElementById('result' + i).getContext("2d");
