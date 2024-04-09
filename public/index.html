@@ -15,7 +15,12 @@
         }
 
         #loggedin {
-            display: inline;
+            display: inline-block;
+        }
+
+        .profile {
+            /* display: inline-block;
+            width: 330px; */
         }
 
         #pl-container {
@@ -51,6 +56,10 @@
         #result {
             position: absolute;
         }
+
+        h1 {
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -59,6 +68,8 @@
         <div id="login">
             <h1>Create Accurate Playlist Collages</h1>
             <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+            <h4>Collages are based on frequency of album covers, followed by total song length for that cover. More
+                features coming soon!</h4>
         </div>
         <div id="loggedin">
             <div id="user-profile">
@@ -67,17 +78,14 @@
     </div>
 
     <script id="user-profile-template" type="text/x-handlebars-template">
-    <h1>Hello, {{display_name}}</h1>
-    <!-- <div class="media">
-        <div class="pull-left">
-            <img class="media-object" width="150" src="{{images.1.url}}"/>
+    <div class="profile">
+        <div>
+            <h1>Hello, {{display_name}}</h1>
         </div>
-        <div class="media-body">
-            <dl class="dl-horizontal">
-
-            </dl>
-        </div>
+    <!-- <div>
+        <img class="media-object" width="50" src="{{images.1.url}}"/>
     </div> -->
+</div>
 </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -89,11 +97,12 @@
 
         const getHashParams = () => {
             let hashParams = {};
-            let e, r = /([^&;=]+)=?([^&;]*)/g,
-                q = window.location.hash.substring(1);
+            let e, r = /([^&;=]+)=?([^&;]*)/g, q = window.location.hash.substring(1);
+
             while (e = r.exec(q)) {
                 hashParams[e[1]] = decodeURIComponent(e[2]);
             }
+
             return hashParams;
         }
 
@@ -112,7 +121,6 @@
 
         const getPlaylists = (url, array, offset) => {
             return makeRequest(url, playlistLimit, offset).then(data => {
-                console.log(url)
                 for (let i = 0; i < data.items.length; i++) {
                     array.push(data.items[i]);
                 }
@@ -185,24 +193,24 @@
 
                         for (let i = 0; i < playlists.length; i++) {
                             let tracks = [];
-                            const s = Date.now()
                             getTracks(api + `/playlists/${playlists[i].id}/tracks`, tracks, 100).done(() => {
                                 const topCovers = getTopCovers(tracks);
-
-                                const side = topCovers.sideLength
-                                const tileSize = actualSize / side
                                 const ctx = document.getElementById('result' + i).getContext("2d");
-                                for (let x = 0; x < side; x++) {
-                                    for (let y = 0; y < side; y++) {
-                                        let img = new Image();
-                                        img.src = topCovers.covers[side * x + y];
-                                        img.onload = () => {
-                                            ctx.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize);
-                                        };
-                                    }
+
+                                let urls = topCovers.urls;
+                                let locations = topCovers.locations;
+
+                                for (let i = 0; i < urls.length; i++) {
+                                    let img = new Image();
+                                    img.src = urls[i];
+                                    let size = locations[i][2];
+                                    console.log(size)
+
+                                    img.onload = () => {
+                                        ctx.drawImage(img, locations[i][0], locations[i][1], size, size);
+                                    };
                                 }
                             });
-
                         }
                     });
                 });
