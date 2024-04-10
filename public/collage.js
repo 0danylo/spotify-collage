@@ -48,8 +48,8 @@ export const getTopCovers = tracks => {
 
 const getFormat = tracks => {
     let len = tracks.length;
+    console.log(tracks.reduce((a, e) => a + e, 0), tracks.reduce((a, e) => a + e, 0) / len)
     console.log(tracks)
-    console.log(len)
 
     if (len >= 512) {
         return Formats.FIVE_BASIC;
@@ -78,25 +78,54 @@ const getFormat = tracks => {
 
 const getLocations = format => {
     const max = 300;
+
     switch (format) {
         case Formats.ONE:
             return [[0, 0, max]];
         case Formats.TWO:
             var size = max / 2;
-            return [[0, 0, size], [0, size, size], [size, 0, size], [size, size, size]];
+            return [
+                [0, 0, size], [0, size, size],
+                [size, 0, size], [size, size, size]
+            ];
         case Formats.THREE_BASIC:
             var size = max / 3;
-            return [[0, 0, size], [0, size, size], [size, 0, size], [size, size, size], [0, 2 * size, size], [size, 2 * size, size], [2 * size, 2 * size, size], [2 * size, size, size], [2 * size, 0, size]];
+            return [
+                [0, 0, size], [0, size, size], [size, 0, size],
+                [size, size, size], [0, 2 * size, size], [size, 2 * size, size],
+                [2 * size, 2 * size, size], [2 * size, size, size], [2 * size, 0, size]
+            ];
         case Formats.THREE_MAINTL:
             var size = max / 3;
-            return [[0, 0, 2 * size], [2 * size, 0, size], [2 * size, size, size], [2 * size, 2 * size, size], [size, 2 * size, size], [0, 2 * size, size]];
+            return [
+                [0, 0, 2 * size], [2 * size, 0, size],
+                [2 * size, size, size],
+                [size, 2 * size, size], [0, 2 * size, size], [2 * size, 2 * size, size]
+            ];
         case Formats.FOUR_BASIC:
-            var size
-            return [];
+            var size = max / 4;
+            return [
+                [0, 0, size], [0, size, size], [0, 2 * size, size], [0, 3 * size, size],
+                [size, 0, size], [size, size, size], [size, 2 * size, size], [size, 3 * size, size],
+                [2 * size, 0, size], [2 * size, size, size], [2 * size, 2 * size, size], [2 * size, 3 * size, size],
+                [3 * size, 0, size], [3 * size, size, size], [3 * size, 2 * size, size], [3 * size, 3 * size, size]
+            ];
         case Formats.FOUR_MAIN:
-            return [];
+            var size = max / 4;
+            return [
+                [0, 0, size], [0, size, size], [0, 2 * size, size], [0, 3 * size, size],
+                [size, 0, size], [size, size, 2 * size], [size, 3 * size, size],
+                [2 * size, 0, size], [2 * size, 3 * size, size],
+                [3 * size, 0, size], [3 * size, size, size], [3 * size, 2 * size, size], [3 * size, 3 * size, size]
+            ];
         case Formats.FOUR_DUO:
-            return [];
+            var size = max / 4;
+            return [
+                [0, 0, 2 * size], [0, 2 * size, size], [0, 3 * size, size],
+                [size, 2 * size, size], [size, 3 * size, size],
+                [2 * size, 0, size], [2 * size, size, size], [2 * size, 2 * size, 2 * size],
+                [3 * size, 0, size], [3 * size, size, size]
+            ];
         case Formats.FOUR_TRIO:
             return [];
         case Formats.FIVE_BASIC:
