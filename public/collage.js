@@ -83,66 +83,128 @@ const getLocations = format => {
         case Formats.ONE:
             return [[0, 0, max]];
         case Formats.TWO:
-            var size = max / 2;
+            var s = max / 2;
             return [
-                [0, 0, size], [0, size, size],
-                [size, 0, size], [size, size, size]
+                [0, 0, s], [0, s, s],
+                [s, 0, s], [s, s, s]
             ];
         case Formats.THREE_BASIC:
-            var size = max / 3;
+            var s = max / 3;
             return [
-                [0, 0, size], [0, size, size], [size, 0, size],
-                [size, size, size], [0, 2 * size, size], [size, 2 * size, size],
-                [2 * size, 2 * size, size], [2 * size, size, size], [2 * size, 0, size]
+                [0, 0, s], [0, s, s], [s, 0, s],
+                [s, s, s], [0, 2 * s, s], [s, 2 * s, s],
+                [2 * s, 2 * s, s], [2 * s, s, s], [2 * s, 0, s]
             ];
         case Formats.THREE_MAINTL:
-            var size = max / 3;
+            var s = max / 3;
             return [
-                [0, 0, 2 * size], [2 * size, 0, size],
-                [2 * size, size, size],
-                [size, 2 * size, size], [0, 2 * size, size], [2 * size, 2 * size, size]
+                [0, 0, 2 * s], [2 * s, 0, s],
+                [2 * s, s, s],
+                [s, 2 * s, s], [0, 2 * s, s], [2 * s, 2 * s, s]
             ];
         case Formats.FOUR_BASIC:
-            var size = max / 4;
+            var s = max / 4;
             return [
-                [0, 0, size], [0, size, size], [0, 2 * size, size], [0, 3 * size, size],
-                [size, 0, size], [size, size, size], [size, 2 * size, size], [size, 3 * size, size],
-                [2 * size, 0, size], [2 * size, size, size], [2 * size, 2 * size, size], [2 * size, 3 * size, size],
-                [3 * size, 0, size], [3 * size, size, size], [3 * size, 2 * size, size], [3 * size, 3 * size, size]
+                [0, 0, s], [0, s, s], [0, 2 * s, s], [0, 3 * s, s],
+                [s, 0, s], [s, s, s], [s, 2 * s, s], [s, 3 * s, s],
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, s], [2 * s, 3 * s, s],
+                [3 * s, 0, s], [3 * s, s, s], [3 * s, 2 * s, s], [3 * s, 3 * s, s]
             ];
         case Formats.FOUR_MAIN:
-            var size = max / 4;
+            var s = max / 4;
             return [
-                [0, 0, size], [0, size, size], [0, 2 * size, size], [0, 3 * size, size],
-                [size, 0, size], [size, size, 2 * size], [size, 3 * size, size],
-                [2 * size, 0, size], [2 * size, 3 * size, size],
-                [3 * size, 0, size], [3 * size, size, size], [3 * size, 2 * size, size], [3 * size, 3 * size, size]
+                [0, 0, s], [0, s, s], [0, 2 * s, s], [0, 3 * s, s],
+                [s, 0, s], [s, s, 2 * s], [s, 3 * s, s],
+                [2 * s, 0, s], [2 * s, 3 * s, s],
+                [3 * s, 0, s], [3 * s, s, s], [3 * s, 2 * s, s], [3 * s, 3 * s, s]
             ];
         case Formats.FOUR_DUO:
-            var size = max / 4;
+            var s = max / 4;
             return [
-                [0, 0, 2 * size], [0, 2 * size, size], [0, 3 * size, size],
-                [size, 2 * size, size], [size, 3 * size, size],
-                [2 * size, 0, size], [2 * size, size, size], [2 * size, 2 * size, 2 * size],
-                [3 * size, 0, size], [3 * size, size, size]
+                [0, 0, 2 * s], [0, 2 * s, s], [0, 3 * s, s],
+                [s, 2 * s, s], [s, 3 * s, s],
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, 2 * s],
+                [3 * s, 0, s], [3 * s, s, s]
             ];
         case Formats.FOUR_TRIO:
-            return [];
+            var s = max / 4;
+            return [
+                [0, 0, 2 * s], [0, 2 * s, 2 * s]
+                ,
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, 2 * s],
+                [3 * s, 0, s], [3 * s, s, s]
+            ];
         case Formats.FIVE_BASIC:
-            return [];
+            var s = max / 5;
+            return [
+                [0, 0, s], [0, s, s], [0, 2 * s, s], [0, 3 * s, s], [0, 4 * s, s],
+                [s, 0, s], [s, s, s], [s, 2 * s, s], [s, 3 * s, s], [s, 4 * s, s],
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, s], [2 * s, 3 * s, s], [2 * s, 4 * s, s],
+                [3 * s, 0, s], [3 * s, s, s], [3 * s, 2 * s, s], [3 * s, 3 * s, s], [3 * s, 4 * s, s],
+                [4 * s, 0, s], [4 * s, s, s], [4 * s, 2 * s, s], [4 * s, 3 * s, s], [4 * s, 4 * s, s]
+            ];
         case Formats.FIVE_MAIN:
-            return [];
+            var s = max / 5;
+            return [
+                [0, 0, s], [0, s, s], [0, 2 * s, s], [0, 3 * s, s], [0, 4 * s, s],
+                [s, 0, s], [s, s, s], [s, 2 * s, s], [s, 3 * s, s], [s, 4 * s, s],
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, s], [2 * s, 3 * s, s], [2 * s, 4 * s, s],
+                [3 * s, 0, s], [3 * s, s, s], [3 * s, 2 * s, s], [3 * s, 3 * s, s], [3 * s, 4 * s, s],
+                [4 * s, 0, s], [4 * s, s, s], [4 * s, 2 * s, s], [4 * s, 3 * s, s], [4 * s, 4 * s, s]
+            ];
         case Formats.FIVE_MAINTL:
-            return [];
+            var s = max / 5;
+            return [
+                [0, 0, 2 * s], [0, 2 * s, s], [0, 3 * s, s], [0, 4 * s, s],
+                [s, 2 * s, s], [s, 3 * s, s], [s, 4 * s, s],
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, s], [2 * s, 3 * s, s], [2 * s, 4 * s, s],
+                [3 * s, 0, s], [3 * s, s, s], [3 * s, 2 * s, s], [3 * s, 3 * s, s], [3 * s, 4 * s, s],
+                [4 * s, 0, s], [4 * s, s, s], [4 * s, 2 * s, s], [4 * s, 3 * s, s], [4 * s, 4 * s, s]
+            ];
         case Formats.FIVE_DIAG:
-            return [];
+            var s = max / 5;
+            return [
+                [0, 0, 3 * s], [0, 3 * s, s], [0, 4 * s, s],
+                [s, 3 * s, s], [s, 4 * s, s],
+                [2 * s, 3 * s, s], [2 * s, 4 * s, s],
+                [3 * s, 0, s], [3 * s, s, s], [3 * s, 2 * s, s], [3 * s, 3 * s, 2 * s],
+                [4 * s, 0, s], [4 * s, s, s], [4 * s, 2 * s, s],
+            ];
         case Formats.FIVE_SOLO:
-            return [];
+            var s = max / 5;
+            return [
+                [0, 0, s], [0, s, s], [0, 2 * s, s], [0, 3 * s, s], [0, 4 * s, s],
+                [s, 0, s], [s, s, 3 * s], [s, 4 * s, s],
+                [2 * s, 0, s], [2 * s, 4 * s, s],
+                [3 * s, 0, s], [3 * s, 4 * s, s],
+                [4 * s, 0, s], [4 * s, s, s], [4 * s, 2 * s, s], [4 * s, 3 * s, s], [4 * s, 4 * s, s]
+            ];
         case Formats.FIVE_DUO:
-            return [];
+            var s = max / 5;
+            return [
+                [0, 0, 2 * s], [0, 2 * s, s], [0, 3 * s, s], [0, 4 * s, s],
+                [s, 2 * s, s], [s, 3 * s, s], [s, 4 * s, s],
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, s], [2 * s, 3 * s, s], [2 * s, 4 * s, s],
+                [3 * s, 0, s], [3 * s, s, s], [3 * s, 2 * s, s], [3 * s, 3 * s, 2 * s],
+                [4 * s, 0, s], [4 * s, s, s], [4 * s, 2 * s, s]
+            ];
         case Formats.FIVE_TRIO:
-            return [];
+            var s = max / 5;
+            return [
+                [0, 0, 2 * s], [0, 2 * s, s], [0, 3 * s, 2 * s],
+                [s, 2 * s, s],
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, s], [2 * s, 3 * s, s], [2 * s, 4 * s, s],
+                [3 * s, 0, 2 * s], [3 * s, 2 * s, s], [3 * s, 3 * s, s], [3 * s, 4 * s, s],
+                [4 * s, 2 * s, s], [4 * s, 3 * s, s], [4 * s, 4 * s, s]
+            ];
         case Formats.FIVE_QUAD:
-            return [];
+            var s = max / 5;
+            return [
+                [0, 0, 2 * s], [0, 2 * s, s], [0, 3 * s, 2 * s],
+                [s, 2 * s, s],
+                [2 * s, 0, s], [2 * s, s, s], [2 * s, 2 * s, s], [2 * s, 3 * s, s], [2 * s, 4 * s, s],
+                [3 * s, 0, 2 * s], [3 * s, 2 * s, s], [3 * s, 3 * s, 2 * s],
+                [4 * s, 2 * s, s]
+            ];
     }
 }
