@@ -46,7 +46,6 @@ export const getTopCovers = tracks => {
             lens.set(url, length);
         }
     });
-    console.log(tracks)
 
     freqs = new Map([...freqs.entries()].sort((a, b) => {
         const f = b[1] - a[1];
@@ -68,33 +67,33 @@ const getFormat = tracks => {
     if (len >= 25) {
         if (tracks[0] > SQRT_4 * tracks[1]) {
             return Formats.FIVE_MAINTL;
-        } else if (tracks[0] >= SQRT_3 * tracks[2] && tracks[1] >= SQRT_2 * tracks[2]) {
+        } else if (tracks[0] > SQRT_3 * tracks[2] && tracks[1] >= SQRT_2 * tracks[2]) {
             return Formats.FIVE_DIAG;
-        } else if (tracks[0] >= SQRT_3 * tracks[2]) {
+        } else if (tracks[0] > SQRT_3 * tracks[2]) {
             return Formats.FIVE_MAIN;
-        } else if (tracks[3] >= SQRT_2 * tracks[4]) {
+        } else if (tracks[3] > SQRT_2 * tracks[4]) {
             return Formats.FIVE_QUAD;
-        } else if (tracks[2] >= SQRT_2 * tracks[3]) {
+        } else if (tracks[2] > SQRT_2 * tracks[3]) {
             return Formats.FIVE_TRIO;
-        } else if (tracks[1] >= SQRT_2 * tracks[2]) {
+        } else if (tracks[1] > SQRT_2 * tracks[2]) {
             return Formats.FIVE_DUO;
-        } else if (tracks[0] >= SQRT_2 * tracks[1]) {
+        } else if (tracks[0] > SQRT_2 * tracks[1]) {
             return Formats.FIVE_SOLO;
         } else {
             return Formats.FIVE_BASIC;
         }
     } else if (len >= 16) {
-        if (tracks[2] >= SQRT_2 * tracks[3]) {
+        if (tracks[2] > SQRT_2 * tracks[3]) {
             return Formats.FOUR_TRIO;
-        } else if (tracks[1] >= SQRT_2 * tracks[2]) {
+        } else if (tracks[1] > SQRT_2 * tracks[2]) {
             return Formats.FOUR_DUO;
-        } else if (tracks[0] >= SQRT_2 * tracks[1]) {
+        } else if (tracks[0] > SQRT_2 * tracks[1]) {
             return Formats.FOUR_MAIN;
         } else {
             return Formats.FOUR_BASIC;
         }
     } else if (len >= 9) {
-        if (tracks[0] >= 2 * tracks[1]) {
+        if (tracks[0] > 2 * tracks[1]) {
             return Formats.THREE_MAINTL;
         } else {
             return Formats.THREE_BASIC;
@@ -110,7 +109,6 @@ const getLocations = format => {
     const max = 300;
     let ret, s = max;
 
-    console.log(format)
     if (format === Formats.ONE) {
         ret = [[0, 0, 1]];
     } else if (format === Formats.TWO) {
