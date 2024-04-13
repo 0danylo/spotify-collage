@@ -23,6 +23,7 @@ const SQRT_4 = 2
 
 export const getTopCovers = tracks => {
     let freqs = new Map();
+    let lens = new Map();
 
     tracks.forEach(track => {
         const images = track.track.album.images;
@@ -38,12 +39,21 @@ export const getTopCovers = tracks => {
         } else {
             freqs.set(url, 1);
         }
+
+        if (lens.has(url)) {
+            lens.set(url, lens.get(url) + length);
+        } else {
+            lens.set(url, length);
+        }
     });
 
-    freqs = new Map([...freqs.entries()].sort((a, b) => b[1] - a[1]));
+    freqs = new Map([...freqs.entries()].sort((a, b) => {
+        const f = b[1] - a[1];
+        
+        return f == 0 ? lens.get(b[0]) - lens.get(a[0]) : f;
+    }));
 
     const format = getFormat(Array.from(freqs.values()));
-    console.log(format)
     const locations = getLocations(format);
 
     return {
