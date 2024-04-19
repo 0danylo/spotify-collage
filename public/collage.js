@@ -57,7 +57,7 @@ export const getTopCovers = tracks => {
 
     return {
         urls: Array.from(freqs.keys()).slice(0, locations.length),
-        locations: locations
+        locations: locations,
     };
 }
 
@@ -115,14 +115,14 @@ const getLocations = format => {
         s = max / 2;
         ret = [
             [0, 0, 1], [1, 0, 1],
-            [0, 1, 1], [1, 1, 1]
+            [0, 1, 1], [1, 1, 1],
         ];
     } else if (format === Formats.THREE_BASIC) {
         s = max / 3;
         ret = [
             [0, 0, 1], [1, 0, 1], [2, 0, 1],
             [0, 1, 1], [1, 1, 1], [2, 1, 1],
-            [0, 2, 1], [1, 2, 1], [2, 2, 1]
+            [0, 2, 1], [1, 2, 1], [2, 2, 1],
         ];
     } else if (format === Formats.THREE_MAINTL) {
         s = max / 3;
@@ -130,7 +130,7 @@ const getLocations = format => {
             [0, 0, 2],
             [2, 0, 1],
             [2, 1, 1],
-            [0, 2, 1], [1, 2, 1], [2, 2, 1]
+            [0, 2, 1], [1, 2, 1], [2, 2, 1],
         ];
     } else if (format === Formats.FOUR_BASIC) {
         s = max / 4;
