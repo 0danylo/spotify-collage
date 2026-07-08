@@ -6,10 +6,47 @@ const cookieParser = require('cookie-parser')
 
 const clientID = 'b73bb6d645664a5c8648994b4b95a763'
 const clientSecret = process.env.CLIENT_SECRET
-const redirectURI = process.env.REDIRECT_URI
+const callbackPath = '/callback'
 
 const stateKey = 'spotify_auth_state';
 const app = express();
+app.set('trust proxy', true);
+
+const getFirstHeaderValue = value => {
+    if (!value) {
+        return null;
+    }
+
+    return value.split(',')[0].trim();
+};
+
+const isLocalhostHost = host => {
+    const hostname = host.split(':')[0].toLowerCase();
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+};
+
+const resolveRedirectURI = req => {
+    const configuredRedirectURI = process.env.SPOTIFY_REDIRECT_URI || process.env.REDIRECT_URI;
+    const configuredBaseURL = process.env.APP_BASE_URL;
+
+    let redirectURL;
+    if (configuredRedirectURI) {
+        redirectURL = new URL(configuredRedirectURI);
+    } else if (configuredBaseURL) {
+        redirectURL = new URL(callbackPath, configuredBaseURL);
+    } else {
+        const proto = getFirstHeaderValue(req.headers['x-forwarded-proto']) || req.protocol;
+        const host = getFirstHeaderValue(req.headers['x-forwarded-host']) || req.get('host');
+        redirectURL = new URL(callbackPath, `${proto}://${host}`);
+    }
+
+    const isLocal = isLocalhostHost(redirectURL.host);
+    if (redirectURL.protocol !== 'https:' && !isLocal) {
+        throw new Error(`Insecure redirect_uri is not allowed outside localhost: ${redirectURL.toString()}`);
+    }
+
+    return redirectURL.toString();
+};
 
 const generateRandomString = length => {
     let text = '';
@@ -28,6 +65,12 @@ app.use(express.static(__dirname + '../public'))
 app.get('/login', (req, res) => {
     const state = generateRandomString(16);
     res.cookie(stateKey, state);
+    let redirectURI;
+    try {
+        redirectURI = resolveRedirectURI(req);
+    } catch (error) {
+        return res.status(500).send(error.message);
+    }
 
     const scope = 'playlist-read-private';
     res.redirect('https://accounts.spotify.com/authorize?' +
@@ -41,6 +84,16 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/callback', (req, res) => {
+    let redirectURI;
+    try {
+        redirectURI = resolveRedirectURI(req);
+    } catch (error) {
+        return res.redirect('/#' +
+            querystring.stringify({
+                error: 'insecure_redirect_uri'
+            }));
+    }
+
     const code = req.query.code || null;
     const state = req.query.state || null;
     const storedState = req.cookies ? req.cookies[stateKey] : null;
@@ -87,3 +140,4 @@ app.get('/callback', (req, res) => {
 });
 
 module.exports = app;
+module.exports.resolveRedirectURI = resolveRedirectURI;
